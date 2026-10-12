@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>我的第一個手機 AR 虛擬長輩原型</title>
+
+  <!-- 3D 場景工具 -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- MindAR 圖片辨識工具 -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+    }
+
+    #status {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 10;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.72);
+      color: white;
+      text-align: center;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="status">正在準備 AR，請稍候……</div>
+
+  <a-scene
+    mindar-image="
+      imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;
+      autoStart: true;
+      uiLoading: yes;
+      uiScanning: yes;
+      uiError: yes;
+    "
+    color-space="sRGB"
+    renderer="colorManagement: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    loading-screen="enabled: false"
+  >
+
+    <!-- 相機及場景資源 -->
+    <a-assets>
+      <img
+        id="targetImage"
+        src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.png"
+        crossorigin="anonymous"
+      >
+    </a-assets>
+
+    <!-- AR 相機 -->
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false"
+    ></a-camera>
+
+    <!-- 只有辨識到目標圖片時，才顯示這個區域 -->
+    <a-entity
+      id="arTarget"
+      mindar-image-target="targetIndex: 0"
+    >
+
+      <!-- 藍色 3D 測試方塊 -->
+      <a-box
+        position="0 0 0.25"
+        width="0.25"
+        height="0.25"
+        depth="0.25"
+        color="#1687FF"
+        material="metalness: 0.1; roughness: 0.45"
+        animation="
+          property: rotation;
+          to: 0 360 0;
+          dur: 4000;
+          easing: linear;
+          loop: true
+        "
+      ></a-box>
+
+      <!-- 方塊下方的文字 -->
+      <a-text
+        value="Hello AR!"
+        position="0 -0.25 0.25"
+        align="center"
+        color="#FFFFFF"
+        width="1.5"
+        side="double"
+      ></a-text>
+
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    const statusBox = document.getElementById("status");
+    const scene = document.querySelector("a-scene");
+    const target = document.getElementById("arTarget");
+
+    // 場景初始化完成
+    scene.addEventListener("loaded", () => {
+      statusBox.textContent =
+        "相機準備中：請將鏡頭對準官方測試圖片";
+    });
+
+    // 成功辨識圖片
+    target.addEventListener("targetFound", () => {
+      statusBox.textContent =
+        "成功辨識圖片！AR 物件已出現。";
+    });
+
+    // 圖片離開相機畫面
+    target.addEventListener("targetLost", () => {
+      statusBox.textContent =
+        "尚未辨識到圖片，請將鏡頭對準測試圖片";
+    });
+  </script>
+</body>
+</html>
